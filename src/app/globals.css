@@ -1,0 +1,122 @@
+@import url('https://api.fontshare.com/v2/css?f[]=switzer@300,400,500,600,700,800,900&display=swap');
+
+@font-face {
+  font-family: 'Tempting';
+  src: url('/fonts/tempting.ttf') format('truetype'),
+       url('/fonts/tempting.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #161616;
+  --foreground: #F2F1ED;
+  --obsidian: #161616;
+  --pearl: #F2F1ED;
+  --crimson: #710014;
+  --font-switzer: 'Switzer', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-tempting: 'Tempting', cursive;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: #161616;
+  color: #F2F1ED;
+  color-scheme: dark;
+  scrollbar-width: thin;
+  scrollbar-color: #710014 #161616;
+}
+
+body {
+  background-color: #161616;
+  color: #F2F1ED;
+  overflow-x: clip;
+  font-family: var(--font-switzer), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Selection Highlight */
+::selection {
+  background-color: rgba(113, 0, 20, 0.65);
+  color: #F2F1ED;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #161616;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(242, 241, 237, 0.15);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #710014;
+}
+
+/* Utilities & Design Tokens */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .font-tempting {
+    font-family: var(--font-tempting), cursive;
+  }
+
+  .font-switzer {
+    font-family: var(--font-switzer), sans-serif;
+  }
+
+  .bg-grid-cyber {
+    background-size: 48px 48px;
+    background-image:
+      linear-gradient(to right, rgba(242, 241, 237, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(242, 241, 237, 0.03) 1px, transparent 1px);
+  }
+
+  .glass-card {
+    background: linear-gradient(180deg, rgba(242, 241, 237, 0.04) 0%, rgba(22, 22, 22, 0.75) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(242, 241, 237, 0.1);
+  }
+
+  .glass-pill {
+    background: rgba(242, 241, 237, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(242, 241, 237, 0.12);
+  }
+}
+
+/* Standardized Button System */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#710014] hover:bg-[#8c0019] text-[#F2F1ED] font-sans text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-lg shadow-[#710014]/30 active:scale-95 border border-[#710014];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-[#161616]/80 hover:bg-[#710014]/20 border border-[#F2F1ED]/15 hover:border-[#710014] text-[#F2F1ED] font-sans text-xs uppercase tracking-wider transition-all duration-200 active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply p-2 rounded-xl bg-[#161616]/60 hover:bg-[#710014]/25 border border-[#F2F1ED]/10 hover:border-[#710014]/40 text-[#F2F1ED]/70 hover:text-[#F2F1ED] transition-all duration-200 active:scale-95;
+  }
+}
