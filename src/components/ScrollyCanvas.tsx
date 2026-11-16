@@ -154,11 +154,13 @@ export default function ScrollyCanvas({ children, onProgressChange }: ScrollyCan
     };
 
     window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
     // Draw initial frame once mounted
     handleResize();
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
   }, [drawFrame]);
@@ -200,7 +202,7 @@ export default function ScrollyCanvas({ children, onProgressChange }: ScrollyCan
       className="relative h-[320vh] w-full bg-[#161616]"
     >
       {/* Sticky viewport container */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#161616]">
+      <div className="sticky top-0 h-screen h-dvh w-full overflow-hidden bg-[#161616]">
         {/* Canvas element */}
         <canvas
           ref={canvasRef}

@@ -25,7 +25,11 @@ export default function Projects() {
     const handleResize = () => setWindowWidth(window.innerWidth);
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
   }, []);
 
   const projectCount = PROJECTS.length;
@@ -56,13 +60,16 @@ export default function Projects() {
     });
   }, [smoothProgress, projectCount]);
 
-  // Scaled down spiral geometry so entire component fits comfortably in any viewport
-  const isMobile = windowWidth < 640;
+  // Finely tiered responsiveness for phones, phablets, tablets, and desktops
+  const isSmallMobile = windowWidth < 380;
+  const isMobile = windowWidth >= 380 && windowWidth < 640;
   const isTablet = windowWidth >= 640 && windowWidth < 1024;
-  
-  const radius = isMobile ? 210 : isTablet ? 290 : 360;
-  const angleStep = isMobile ? 48 : 52;
-  const yStep = isMobile ? 20 : 28;
+
+  const radius = isSmallMobile ? 160 : isMobile ? 195 : isTablet ? 285 : 360;
+  const angleStep = isSmallMobile ? 54 : isMobile ? 50 : 52;
+  const yStep = isSmallMobile ? 16 : isMobile ? 20 : isTablet ? 24 : 28;
+  const perspective = isSmallMobile ? "720px" : isMobile ? "850px" : isTablet ? "1050px" : "1200px";
+
   const totalAngle = (projectCount - 1) * angleStep;
   const totalY = (projectCount - 1) * yStep;
 
@@ -70,15 +77,41 @@ export default function Projects() {
   const turntableRotateY = useTransform(smoothProgress, [0, 1], [0, -totalAngle]);
   const turntableTranslateY = useTransform(smoothProgress, [0, 1], [0, -totalY]);
 
-  // Programmatic jump to project index
+  // Touch swipe support for mobile
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX < 0) {
+        jumpToProject(Math.min(projectCount - 1, activeIdx + 1));
+      } else {
+        jumpToProject(Math.max(0, activeIdx - 1));
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
+  // Programmatic jump to project index with robust viewport offset calculation
   const jumpToProject = (targetIndex: number) => {
     if (!containerRef.current) return;
     const container = containerRef.current;
-    const containerTop = container.offsetTop;
+    const rect = container.getBoundingClientRect();
+    const containerTop = rect.top + window.scrollY;
     const containerHeight = container.offsetHeight - window.innerHeight;
     const targetScrollY = containerTop + (targetIndex / (projectCount - 1)) * containerHeight;
     window.scrollTo({
-      top: targetScrollY,
+      top: Math.max(0, targetScrollY),
       behavior: "smooth",
     });
   };
@@ -87,25 +120,25 @@ export default function Projects() {
     <section
       id="projects"
       ref={containerRef}
-      className="relative w-full bg-[#161616] text-[#F2F1ED] z-20 min-h-[340vh] font-sans"
+      className="relative w-full bg-[#161616] text-[#F2F1ED] z-20 min-h-[340vh] font-sans overflow-hidden"
     >
       {/* Ambient background glows with Crimson Red */}
-      <div className="pointer-events-none fixed top-1/4 left-10 w-[450px] h-[450px] bg-[#710014]/15 rounded-full blur-[140px]" />
-      <div className="pointer-events-none fixed bottom-1/4 right-10 w-[450px] h-[450px] bg-[#710014]/10 rounded-full blur-[140px]" />
+      <div className="pointer-events-none fixed top-1/4 left-5 sm:left-10 w-[300px] sm:w-[450px] h-[300px] sm:h-[450px] bg-[#710014]/15 rounded-full blur-[120px] sm:blur-[140px]" />
+      <div className="pointer-events-none fixed bottom-1/4 right-5 sm:right-10 w-[300px] sm:w-[450px] h-[300px] sm:h-[450px] bg-[#710014]/10 rounded-full blur-[120px] sm:blur-[140px]" />
 
-      {/* Sticky 3D Viewport: Fits cleanly within screen height */}
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-between overflow-hidden px-4 sm:px-8 md:px-12 pt-16 pb-4 sm:pb-6">
+      {/* Sticky 3D Viewport */}
+      <div className="sticky top-0 h-screen h-dvh w-full flex flex-col justify-between overflow-hidden px-3 xs:px-4 sm:px-8 md:px-12 pt-14 xs:pt-16 sm:pt-20 pb-3 xs:pb-4 sm:pb-6">
         
         {/* Top Header */}
-        <div className="relative z-30 max-w-6xl w-full mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-3 pt-2">
+        <div className="relative z-30 max-w-6xl w-full mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3 pt-1">
           <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#710014]/20 border border-[#710014]/40 text-[11px] font-sans uppercase tracking-widest text-[#F2F1ED] mb-1.5 shadow-[0_0_12px_rgba(113,0,20,0.3)]">
+            <div className="inline-flex items-center gap-1.5 xs:gap-2 px-2.5 py-0.5 rounded-full bg-[#710014]/20 border border-[#710014]/40 text-[10px] xs:text-[11px] font-sans uppercase tracking-widest text-[#F2F1ED] mb-1 sm:mb-1.5 shadow-[0_0_12px_rgba(113,0,20,0.3)]">
               <Sparkles className="w-3 h-3 text-[#710014]" />
-              <span className="font-tempting text-sm normal-case mr-1 text-[#F2F1ED]">selected</span>
+              <span className="font-tempting text-xs xs:text-sm normal-case mr-1 text-[#F2F1ED]">selected</span>
               <span>Works &bull; 3D Spiral</span>
             </div>
 
-            <h2 className="text-xl sm:text-3xl md:text-4xl font-black text-[#F2F1ED] tracking-tight uppercase">
+            <h2 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-black text-[#F2F1ED] tracking-tight uppercase">
               My{" "}
               <span className="text-[#710014]">
                 Projects
@@ -114,17 +147,19 @@ export default function Projects() {
           </div>
 
           {/* Quick HUD Guide */}
-          <div className="flex items-center gap-2 bg-[#161616]/80 border border-[#F2F1ED]/10 px-3 py-1 rounded-full text-xs font-sans text-[#F2F1ED]/70 backdrop-blur-md self-start sm:self-end">
+          <div className="flex items-center gap-2 bg-[#161616]/80 border border-[#F2F1ED]/10 px-2.5 xs:px-3 py-1 rounded-full text-[10px] xs:text-xs font-sans text-[#F2F1ED]/70 backdrop-blur-md self-start sm:self-end">
             <Layers className="w-3.5 h-3.5 text-[#710014] shrink-0" />
-            <span className="text-[11px]">Scroll down to rotate 3D spiral</span>
+            <span className="truncate">Scroll or swipe to rotate 3D spiral</span>
           </div>
         </div>
 
-        {/* 3D Spiral Arena Container */}
+        {/* 3D Spiral Arena Container with Touch Events */}
         <div
-          className="relative z-20 flex-1 w-full max-w-6xl mx-auto flex items-center justify-center my-auto"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="relative z-20 flex-1 w-full max-w-6xl mx-auto flex items-center justify-center my-auto touch-pan-y"
           style={{
-            perspective: isMobile ? "850px" : "1150px",
+            perspective: perspective,
             perspectiveOrigin: "50% 50%",
           }}
         >
@@ -166,11 +201,11 @@ export default function Projects() {
                     whileHover={{ scale: 1.02, z: 20 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     style={{
-                      height: isMobile ? "295px" : "315px",
-                      opacity: isActive ? 1 : Math.max(0.4, 0.9 - distFromActive * 0.25),
+                      height: isSmallMobile ? "275px" : isMobile ? "290px" : isTablet ? "310px" : "325px",
+                      opacity: isActive ? 1 : Math.max(0.35, 0.9 - distFromActive * 0.25),
                       filter: isActive ? "none" : `blur(${Math.min(2.5, distFromActive * 1.2)}px)`,
                     }}
-                    className={`relative w-[260px] sm:w-[300px] md:w-[330px] lg:w-[350px] rounded-xl p-3.5 sm:p-4 bg-[#161616]/95 border backdrop-blur-2xl transition-all duration-500 shadow-2xl flex flex-col justify-between overflow-hidden select-none cursor-pointer ${
+                    className={`relative w-[230px] xs:w-[265px] sm:w-[300px] md:w-[330px] lg:w-[350px] rounded-xl p-3 xs:p-3.5 sm:p-4 bg-[#161616]/95 border backdrop-blur-2xl transition-all duration-500 shadow-2xl flex flex-col justify-between overflow-hidden select-none cursor-pointer ${
                       isActive
                         ? "border-[#710014] shadow-[0_0_35px_rgba(113,0,20,0.4)] ring-1 ring-[#710014]/60"
                         : "border-[#F2F1ED]/10 hover:border-[#710014]/50 hover:opacity-100"
@@ -183,50 +218,50 @@ export default function Projects() {
                     />
 
                     {/* Top Bar: Index, Category, Year */}
-                    <div className="relative z-10 flex items-center justify-between mb-1.5">
+                    <div className="relative z-10 flex items-center justify-between mb-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-sans text-[11px] font-bold text-[#710014]">
+                        <span className="font-sans text-[10px] xs:text-[11px] font-bold text-[#710014]">
                           /{indexStr}
                         </span>
-                        <span className="text-[10px] font-sans uppercase tracking-wider text-[#F2F1ED]/60 truncate max-w-[150px]">
+                        <span className="text-[9px] xs:text-[10px] font-sans uppercase tracking-wider text-[#F2F1ED]/60 truncate max-w-[120px] xs:max-w-[150px]">
                           {project.category}
                         </span>
                       </div>
-                      <span className="font-sans text-[9px] text-[#F2F1ED]/70 px-2 py-0.5 rounded-full border border-[#F2F1ED]/10 bg-[#161616]">
+                      <span className="font-sans text-[8px] xs:text-[9px] text-[#F2F1ED]/70 px-1.5 xs:px-2 py-0.5 rounded-full border border-[#F2F1ED]/10 bg-[#161616]">
                         {project.year}
                       </span>
                     </div>
 
                     {/* Title & Subtitle */}
                     <div className="relative z-10 mb-1">
-                      <h3 className="text-sm sm:text-base font-bold text-[#F2F1ED] group-hover:text-[#F2F1ED] transition-colors duration-300 mb-0.5 line-clamp-1">
+                      <h3 className="text-xs xs:text-sm sm:text-base font-bold text-[#F2F1ED] transition-colors duration-300 mb-0.5 line-clamp-1">
                         {project.title}
                       </h3>
-                      <p className="text-[10px] sm:text-[11px] font-sans uppercase tracking-wider text-[#710014] font-semibold mb-1 line-clamp-1">
+                      <p className="text-[9px] xs:text-[10px] sm:text-[11px] font-sans uppercase tracking-wider text-[#710014] font-semibold mb-1 line-clamp-1">
                         {project.subtitle}
                       </p>
-                      <p className="text-[11px] text-[#F2F1ED]/80 leading-snug font-light line-clamp-2">
+                      <p className="text-[10px] xs:text-[11px] text-[#F2F1ED]/80 leading-snug font-light line-clamp-2">
                         {project.description}
                       </p>
                     </div>
 
                     {/* Verified Telemetry Box */}
-                    <div className="relative z-10 rounded-lg p-2 bg-[#161616] border border-[#F2F1ED]/10 flex flex-col gap-1 my-0.5">
-                      <div className="grid grid-cols-3 gap-1 text-center sm:text-left">
+                    <div className="relative z-10 rounded-lg p-1.5 xs:p-2 bg-[#161616] border border-[#F2F1ED]/10 flex flex-col gap-1 my-0.5">
+                      <div className="grid grid-cols-3 gap-1 text-center">
                         {project.metrics.map((metric) => (
                           <div key={metric.label} className="flex flex-col">
-                            <span className="text-[8px] font-sans uppercase tracking-wider text-[#F2F1ED]/50 truncate">
+                            <span className="text-[7px] xs:text-[8px] font-sans uppercase tracking-wider text-[#F2F1ED]/50 truncate">
                               {metric.label}
                             </span>
-                            <span className="text-[10px] font-sans font-bold text-[#F2F1ED] truncate">
+                            <span className="text-[9px] xs:text-[10px] font-sans font-bold text-[#F2F1ED] truncate">
                               {metric.value}
                             </span>
                           </div>
                         ))}
                       </div>
 
-                      <div className="flex items-center justify-between pt-1 border-t border-[#F2F1ED]/10 text-[9px] font-sans text-[#F2F1ED]/60">
-                        <span className="truncate max-w-[130px]">Role: {project.role}</span>
+                      <div className="flex items-center justify-between pt-1 border-t border-[#F2F1ED]/10 text-[8px] xs:text-[9px] font-sans text-[#F2F1ED]/60">
+                        <span className="truncate max-w-[120px]">Role: {project.role}</span>
                         <span className="text-[#710014] flex items-center gap-1 shrink-0 font-semibold">
                           <CheckCircle2 className="w-2.5 h-2.5 text-[#710014]" /> Verified
                         </span>
@@ -235,17 +270,17 @@ export default function Projects() {
 
                     {/* Tech Stack Pills */}
                     <div className="relative z-10 flex flex-wrap gap-1 mb-1">
-                      {project.techStack.slice(0, 4).map((tech) => (
+                      {project.techStack.slice(0, 3).map((tech) => (
                         <span
                           key={tech}
-                          className="px-1.5 py-0.5 text-[9px] font-sans text-[#F2F1ED]/80 bg-[#161616] border border-[#F2F1ED]/10 rounded"
+                          className="px-1.5 py-0.5 text-[8px] xs:text-[9px] font-sans text-[#F2F1ED]/80 bg-[#161616] border border-[#F2F1ED]/10 rounded"
                         >
                           {tech}
                         </span>
                       ))}
-                      {project.techStack.length > 4 && (
-                        <span className="px-1 py-0.5 text-[8px] font-sans text-[#F2F1ED]/50 bg-[#161616] border border-[#F2F1ED]/10 rounded">
-                          +{project.techStack.length - 4}
+                      {project.techStack.length > 3 && (
+                        <span className="px-1 py-0.5 text-[7px] xs:text-[8px] font-sans text-[#F2F1ED]/50 bg-[#161616] border border-[#F2F1ED]/10 rounded">
+                          +{project.techStack.length - 3}
                         </span>
                       )}
                     </div>
@@ -257,7 +292,7 @@ export default function Projects() {
                           e.stopPropagation();
                           setSelectedProject(project);
                         }}
-                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#F2F1ED] hover:text-[#710014] transition-colors"
+                        className="inline-flex items-center gap-1 text-[9px] xs:text-[10px] font-semibold text-[#F2F1ED] hover:text-[#710014] transition-colors"
                       >
                         <span>Architectural Specs</span>
                         <ArrowUpRight className="w-3 h-3 text-[#710014]" />
@@ -272,7 +307,7 @@ export default function Projects() {
                             className="p-1 rounded-lg bg-[#161616] hover:bg-[#710014]/20 border border-[#F2F1ED]/10 hover:border-[#710014] text-[#F2F1ED]/80 hover:text-[#F2F1ED] transition-all"
                             aria-label="View Source on GitHub"
                           >
-                            <GithubIcon className="w-3.5 h-3.5" />
+                            <GithubIcon className="w-3 xs:w-3.5 h-3 xs:h-3.5" />
                           </a>
                         )}
                         {project.liveUrl && (
@@ -283,7 +318,7 @@ export default function Projects() {
                             className="p-1 rounded-lg bg-[#161616] hover:bg-[#710014]/20 border border-[#F2F1ED]/10 hover:border-[#710014] text-[#F2F1ED]/80 hover:text-[#F2F1ED] transition-all"
                             aria-label="Visit Live Project"
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <ExternalLink className="w-3 xs:w-3.5 h-3 xs:h-3.5" />
                           </a>
                         )}
                       </div>
@@ -296,14 +331,14 @@ export default function Projects() {
         </div>
 
         {/* Bottom Floating Spiral Navigation HUD */}
-        <div className="relative z-30 max-w-6xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-1">
+        <div className="relative z-30 max-w-6xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 pt-1">
           {/* Current Focus Pill */}
-          <div className="flex items-center gap-2.5 bg-[#161616]/90 backdrop-blur-xl border border-[#F2F1ED]/10 px-3.5 py-1.5 rounded-xl shadow-lg">
-            <span className="font-sans text-xs text-[#710014] font-bold">
+          <div className="flex items-center gap-2 xs:gap-2.5 bg-[#161616]/90 backdrop-blur-xl border border-[#F2F1ED]/10 px-3 py-1 xs:py-1.5 rounded-xl shadow-lg">
+            <span className="font-sans text-[11px] xs:text-xs text-[#710014] font-bold">
               {String(activeIdx + 1).padStart(2, "0")} / {String(projectCount).padStart(2, "0")}
             </span>
             <span className="w-px h-3 bg-[#F2F1ED]/20" />
-            <span className="text-xs font-semibold text-[#F2F1ED] truncate max-w-[150px] sm:max-w-[220px]">
+            <span className="text-[11px] xs:text-xs font-semibold text-[#F2F1ED] truncate max-w-[140px] xs:max-w-[180px] sm:max-w-[220px]">
               {PROJECTS[activeIdx]?.title}
             </span>
           </div>
@@ -329,7 +364,7 @@ export default function Projects() {
                   aria-label={`Jump to project ${p.title}`}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
                     activeIdx === i
-                      ? "w-6 bg-[#710014] shadow-[0_0_8px_rgba(113,0,20,0.8)]"
+                      ? "w-5 xs:w-6 bg-[#710014] shadow-[0_0_8px_rgba(113,0,20,0.8)]"
                       : "w-1.5 bg-[#F2F1ED]/20 hover:bg-[#F2F1ED]/40"
                   }`}
                 />
@@ -352,7 +387,7 @@ export default function Projects() {
       {/* Case Study Detail Modal */}
       <AnimatePresence>
         {selectedProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-10">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 xs:p-4 sm:p-6 md:p-10">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -368,52 +403,52 @@ export default function Projects() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", duration: 0.5, bounce: 0.1 }}
-              className="relative w-full max-w-2xl rounded-2xl bg-[#161616] border border-[#F2F1ED]/20 p-5 sm:p-7 shadow-2xl max-h-[88vh] overflow-y-auto"
+              className="relative w-full max-w-2xl rounded-2xl bg-[#161616] border border-[#F2F1ED]/20 p-4 xs:p-5 sm:p-7 shadow-2xl max-h-[88vh] max-h-[88dvh] overflow-y-auto"
             >
               {/* Close Button */}
               <button
                 onClick={() => setSelectedProject(null)}
-                className="absolute top-5 right-5 p-1.5 rounded-full bg-[#161616] hover:bg-[#710014]/30 text-[#F2F1ED]/70 hover:text-[#F2F1ED] transition-colors border border-[#F2F1ED]/10"
+                className="absolute top-4 right-4 sm:top-5 sm:right-5 p-1.5 rounded-full bg-[#161616] hover:bg-[#710014]/30 text-[#F2F1ED]/70 hover:text-[#F2F1ED] transition-colors border border-[#F2F1ED]/10 z-10"
                 aria-label="Close Case Study"
               >
                 <X className="w-4 h-4" />
               </button>
 
               {/* Modal Header */}
-              <div className="mb-4">
-                <div className="inline-flex items-center gap-2 text-[11px] font-sans uppercase tracking-widest text-[#710014] font-bold mb-1.5">
+              <div className="mb-4 pr-8">
+                <div className="inline-flex items-center gap-2 text-[10px] xs:text-[11px] font-sans uppercase tracking-widest text-[#710014] font-bold mb-1.5">
                   <span>{selectedProject.category}</span>
                   <span className="text-[#F2F1ED]/30">&bull;</span>
                   <span>{selectedProject.year}</span>
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-black text-[#F2F1ED] mb-1">
+                <h3 className="text-xl xs:text-2xl sm:text-3xl font-black text-[#F2F1ED] mb-1">
                   {selectedProject.title}
                 </h3>
-                <p className="text-xs font-sans text-[#F2F1ED]/60 uppercase tracking-wider">
+                <p className="text-[11px] xs:text-xs font-sans text-[#F2F1ED]/60 uppercase tracking-wider">
                   {selectedProject.subtitle}
                 </p>
               </div>
 
               {/* Description */}
-              <div className="mb-5">
-                <h4 className="text-[11px] font-sans uppercase tracking-wider text-[#710014] font-semibold mb-1.5">
+              <div className="mb-4 xs:mb-5">
+                <h4 className="text-[10px] xs:text-[11px] font-sans uppercase tracking-wider text-[#710014] font-semibold mb-1.5">
                   Architectural Summary
                 </h4>
-                <p className="text-sm text-[#F2F1ED]/80 leading-relaxed font-light">
+                <p className="text-xs xs:text-sm text-[#F2F1ED]/80 leading-relaxed font-light">
                   {selectedProject.description}
                 </p>
               </div>
 
               {/* Deliverables */}
-              <div className="mb-5">
-                <h4 className="text-[11px] font-sans uppercase tracking-wider text-[#710014] font-semibold mb-2">
+              <div className="mb-4 xs:mb-5">
+                <h4 className="text-[10px] xs:text-[11px] font-sans uppercase tracking-wider text-[#710014] font-semibold mb-2">
                   Core Engineering Deliverables
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {selectedProject.deliverables.map((item) => (
                     <div
                       key={item}
-                      className="p-2.5 rounded-lg bg-[#161616] border border-[#F2F1ED]/10 flex items-center gap-2 text-xs font-sans text-[#F2F1ED]"
+                      className="p-2 xs:p-2.5 rounded-lg bg-[#161616] border border-[#F2F1ED]/10 flex items-center gap-2 text-[11px] xs:text-xs font-sans text-[#F2F1ED]"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#710014] shrink-0" />
                       <span>{item}</span>
@@ -423,15 +458,15 @@ export default function Projects() {
               </div>
 
               {/* Telemetry Metrics */}
-              <div className="mb-5">
-                <h4 className="text-[11px] font-sans uppercase tracking-wider text-[#710014] font-semibold mb-2">
+              <div className="mb-4 xs:mb-5">
+                <h4 className="text-[10px] xs:text-[11px] font-sans uppercase tracking-wider text-[#710014] font-semibold mb-2">
                   Verified Performance Telemetry
                 </h4>
-                <div className="grid grid-cols-3 gap-3 p-3 rounded-xl bg-[#161616] border border-[#F2F1ED]/10">
+                <div className="grid grid-cols-3 gap-1.5 xs:gap-3 p-2.5 xs:p-3 rounded-xl bg-[#161616] border border-[#F2F1ED]/10">
                   {selectedProject.metrics.map((m) => (
                     <div key={m.label} className="text-center">
-                      <div className="text-xl font-bold font-sans text-[#F2F1ED]">{m.value}</div>
-                      <div className="text-[10px] font-sans text-[#F2F1ED]/50 uppercase mt-0.5">{m.label}</div>
+                      <div className="text-sm xs:text-lg sm:text-xl font-bold font-sans text-[#F2F1ED] truncate">{m.value}</div>
+                      <div className="text-[8px] xs:text-[10px] font-sans text-[#F2F1ED]/50 uppercase mt-0.5 truncate">{m.label}</div>
                     </div>
                   ))}
                 </div>
@@ -439,14 +474,14 @@ export default function Projects() {
 
               {/* Tech Stack */}
               <div className="mb-5">
-                <h4 className="text-[11px] font-sans uppercase tracking-wider text-[#710014] font-semibold mb-2">
+                <h4 className="text-[10px] xs:text-[11px] font-sans uppercase tracking-wider text-[#710014] font-semibold mb-2">
                   Technology Stack
                 </h4>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1 xs:gap-1.5">
                   {selectedProject.techStack.map((tech) => (
                     <span
                       key={tech}
-                      className="px-2.5 py-1 text-xs font-sans text-[#F2F1ED] bg-[#161616] border border-[#F2F1ED]/15 rounded-lg"
+                      className="px-2 xs:px-2.5 py-0.5 xs:py-1 text-[11px] xs:text-xs font-sans text-[#F2F1ED] bg-[#161616] border border-[#F2F1ED]/15 rounded-lg"
                     >
                       {tech}
                     </span>
@@ -455,13 +490,13 @@ export default function Projects() {
               </div>
 
               {/* External CTAs */}
-              <div className="flex items-center gap-4 pt-6 border-t border-[#F2F1ED]/10">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-4 pt-4 sm:pt-6 border-t border-[#F2F1ED]/10">
                 {selectedProject.liveUrl && (
                   <a
                     href={selectedProject.liveUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#710014] hover:bg-[#8c0019] text-[#F2F1ED] font-semibold text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-[#710014]/30"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#710014] hover:bg-[#8c0019] text-[#F2F1ED] font-semibold text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-[#710014]/30 text-center"
                   >
                     <span>Visit Live Experience</span>
                     <ExternalLink className="w-4 h-4" />
@@ -472,7 +507,7 @@ export default function Projects() {
                     href={selectedProject.githubUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#161616] hover:bg-[#710014]/20 text-[#F2F1ED] font-semibold text-xs uppercase tracking-wider transition-all duration-300 border border-[#F2F1ED]/15"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#161616] hover:bg-[#710014]/20 text-[#F2F1ED] font-semibold text-xs uppercase tracking-wider transition-all duration-300 border border-[#F2F1ED]/15 text-center"
                   >
                     <GithubIcon className="w-4 h-4" />
                     <span>View Repository</span>

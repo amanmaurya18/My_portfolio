@@ -76,28 +76,28 @@ export default function Skills() {
   ];
 
   return (
-    <section id="skills" className="relative w-full bg-[#161616] py-16 sm:py-20 px-6 sm:px-12 md:px-16 z-20 font-sans">
+    <section id="skills" className="relative w-full bg-[#161616] py-12 xs:py-16 sm:py-20 px-3 xs:px-6 sm:px-12 md:px-16 z-20 font-sans">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="max-w-3xl mb-10 sm:mb-12">
-          <div className="inline-flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-[#710014] font-bold mb-2">
+        <div className="max-w-3xl mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-1.5 xs:gap-2 text-[10px] xs:text-xs font-sans uppercase tracking-widest text-[#710014] font-bold mb-2">
             <Compass className="w-3.5 h-3.5 text-[#710014]" />
-            <span className="font-tempting text-base normal-case text-[#F2F1ED] mr-1">technical</span>
+            <span className="font-tempting text-sm xs:text-base normal-case text-[#F2F1ED] mr-1">technical</span>
             <span>Arsenal</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-black text-[#F2F1ED] tracking-tight uppercase mb-3">
+          <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-[#F2F1ED] tracking-tight uppercase mb-2 sm:mb-3">
             Specialized <br />
             <span className="text-[#710014]">
               Capabilities &amp; Stack
             </span>
           </h2>
-          <p className="text-xs sm:text-sm text-[#F2F1ED]/70 font-light leading-relaxed">
+          <p className="text-[11px] xs:text-xs sm:text-sm text-[#F2F1ED]/70 font-light leading-relaxed">
             From low-level C++ algorithms and relational database management to full-stack Next.js production web engineering.
           </p>
         </div>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-5">
           {skillCategories.map((category, idx) => {
             const Icon = category.icon;
             return (
@@ -107,39 +107,39 @@ export default function Skills() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className={`group relative rounded-2xl p-5 sm:p-6 bg-[#161616] border border-[#F2F1ED]/10 ${category.hoverBorder} transition-all duration-500 backdrop-blur-xl flex flex-col justify-between overflow-hidden shadow-2xl ${category.colSpan}`}
+                className={`group relative rounded-2xl p-4 xs:p-5 sm:p-6 bg-[#161616] border border-[#F2F1ED]/10 ${category.hoverBorder} transition-all duration-500 backdrop-blur-xl flex flex-col justify-between overflow-hidden shadow-2xl ${category.colSpan}`}
               >
                 {/* Background Ambient Glow */}
                 <div className="pointer-events-none absolute -right-16 -top-16 w-48 h-48 rounded-full bg-[#710014]/10 group-hover:bg-[#710014]/20 blur-3xl transition-all duration-700" />
 
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`p-2.5 rounded-xl ${category.accentBg} border border-[#F2F1ED]/10 group-hover:scale-105 transition-transform duration-300`}>
-                      <Icon className={`w-5 h-5 ${category.color}`} />
+                  <div className="flex items-center justify-between mb-3 xs:mb-4">
+                    <div className={`p-2 xs:p-2.5 rounded-xl ${category.accentBg} border border-[#F2F1ED]/10 group-hover:scale-105 transition-transform duration-300`}>
+                      <Icon className={`w-4 xs:w-5 h-4 xs:h-5 ${category.color}`} />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-sans px-2.5 py-0.5 rounded-full bg-[#161616] border border-[#F2F1ED]/10 text-[#F2F1ED]/70">
+                    <div className="flex items-center gap-1.5 xs:gap-2">
+                      <span className="text-[9px] xs:text-[10px] font-sans px-2 xs:px-2.5 py-0.5 rounded-full bg-[#161616] border border-[#F2F1ED]/10 text-[#F2F1ED]/70">
                         {category.tag}
                       </span>
-                      <span className="text-xs font-sans uppercase tracking-widest text-[#710014] font-bold">
+                      <span className="text-[10px] xs:text-xs font-sans uppercase tracking-widest text-[#710014] font-bold">
                         0{idx + 1}
                       </span>
                     </div>
                   </div>
 
-                  <h3 className="text-lg sm:text-xl font-bold text-[#F2F1ED] mb-1.5 transition-colors">
+                  <h3 className="text-base xs:text-lg sm:text-xl font-bold text-[#F2F1ED] mb-1 xs:mb-1.5 transition-colors">
                     {category.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-[#F2F1ED]/70 leading-relaxed font-light mb-4">
+                  <p className="text-[11px] xs:text-xs sm:text-sm text-[#F2F1ED]/70 leading-relaxed font-light mb-3 xs:mb-4">
                     {category.description}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-1.5 pt-4 border-t border-[#F2F1ED]/10">
+                <div className="flex flex-wrap gap-1 xs:gap-1.5 pt-3 xs:pt-4 border-t border-[#F2F1ED]/10">
                   {category.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="px-2.5 py-1 text-[11px] font-sans text-[#F2F1ED] bg-[#161616] border border-[#F2F1ED]/10 rounded-lg hover:border-[#710014] transition-colors"
+                      className="px-2 xs:px-2.5 py-0.5 xs:py-1 text-[10px] xs:text-[11px] font-sans text-[#F2F1ED] bg-[#161616] border border-[#F2F1ED]/10 rounded-lg hover:border-[#710014] transition-colors"
                     >
                       {skill}
                     </span>
@@ -151,22 +151,22 @@ export default function Skills() {
         </div>
 
         {/* Philosophy Callout Strip */}
-        <div className="mt-8 sm:mt-10 rounded-2xl p-4 sm:p-6 bg-[#161616] border border-[#F2F1ED]/10 backdrop-blur-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-start sm:items-center gap-3.5">
-            <div className="p-2.5 rounded-xl bg-[#710014]/20 text-[#710014] border border-[#710014]/30 shrink-0">
-              <Sparkles className="w-5 h-5" />
+        <div className="mt-6 sm:mt-10 rounded-2xl p-4 sm:p-6 bg-[#161616] border border-[#F2F1ED]/10 backdrop-blur-xl flex flex-col lg:flex-row lg:items-center justify-between gap-3 xs:gap-4">
+          <div className="flex items-start sm:items-center gap-3 xs:gap-3.5">
+            <div className="p-2 xs:p-2.5 rounded-xl bg-[#710014]/20 text-[#710014] border border-[#710014]/30 shrink-0">
+              <Sparkles className="w-4 xs:w-5 h-4 xs:h-5" />
             </div>
             <div>
-              <h4 className="text-sm sm:text-base font-bold text-[#F2F1ED] mb-1">
+              <h4 className="text-xs xs:text-sm sm:text-base font-bold text-[#F2F1ED] mb-0.5 xs:mb-1">
                 Engineering Discipline &amp; Core Computer Science
               </h4>
-              <p className="text-xs text-[#F2F1ED]/70 leading-relaxed max-w-2xl font-light">
+              <p className="text-[11px] xs:text-xs text-[#F2F1ED]/70 leading-relaxed max-w-2xl font-light">
                 Rigorous computer science fundamentals and algorithmic problem solving honed at PSIT Kanpur, engineered into high-performance web systems.
               </p>
             </div>
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#710014]/20 border border-[#710014]/40 text-[11px] font-sans text-[#F2F1ED] shrink-0 self-start lg:self-center font-bold">
-            <Flame className="w-3.5 h-3.5 text-[#710014]" />
+          <div className="inline-flex items-center gap-1.5 xs:gap-2 px-2.5 xs:px-3 py-1 rounded-full bg-[#710014]/20 border border-[#710014]/40 text-[10px] xs:text-[11px] font-sans text-[#F2F1ED] shrink-0 self-start lg:self-center font-bold">
+            <Flame className="w-3 xs:w-3.5 h-3 xs:h-3.5 text-[#710014]" />
             <span>High Performance Stack</span>
           </div>
         </div>
