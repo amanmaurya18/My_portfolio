@@ -199,7 +199,7 @@ export default function ScrollyCanvas({ children, onProgressChange }: ScrollyCan
     <div
       ref={containerRef}
       id="experience"
-      className="relative h-[320vh] w-full bg-[#161616]"
+      className="relative h-[220vh] sm:h-[300vh] w-full bg-[#161616]"
     >
       {/* Sticky viewport container */}
       <div className="sticky top-0 h-screen h-dvh w-full overflow-hidden bg-[#161616]">
